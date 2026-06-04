@@ -1,20 +1,18 @@
-const getConnection = require('./../inc/db');
 const express = require('express');
 const router = express.Router();
+const menus = require('./../inc/menus');
 
 /* GET home page. */
 router.get('/', async function(req, res, next) {
   try {
-    const conn = await getConnection();  // ← CHAMA a função
-    const [results] = await conn.query(`SELECT * FROM tb_menus ORDER BY title`);
-    
+    const results = await menus.getMenus();
     res.render('index', { 
       title: 'Restaurante Saboroso!',
       menus: results 
     });
   } catch(err) {
-    console.log(err);
-    res.status(500).send('Erro ao carregar o menu');
+    console.error(err);
+    res.status(500).send('Erro ao carregar');
   }
 });
 
@@ -26,12 +24,19 @@ router.get('/contacts', function(req, res, next){
   });
 });
 
-router.get('/menus', function(req, res, next){
-  res.render('menus', {
-    title: 'Menu - Restaurante Saboroso!',
-    background: 'images/img_bg_1.jpg',
-    h1: 'Saboreie nosso menu!'
-  });
+router.get('/menus', async function(req, res, next){
+  try {
+    const results = await menus.getMenus();
+    res.render('menus', {
+      title: 'Menu - Restaurante Saboroso!',
+      background: 'images/img_bg_1.jpg',
+      h1: 'Saboreie nosso menu!',
+      menus: results
+    });
+  } catch(err) {
+    console.error(err);
+    res.status(500).send('Erro ao carregar');
+  }
 });
 
 router.get('/reservations', function(req, res, next){
@@ -39,7 +44,7 @@ router.get('/reservations', function(req, res, next){
     title: 'Reservas - Restaurante Saboroso!',
     background: 'images/img_bg_2.jpg',
     h1: 'Reserve uma Mesa!'
-  })
+  });
 });
 
 router.get('/services', function(req, res, next){
@@ -47,8 +52,7 @@ router.get('/services', function(req, res, next){
     title: 'Serviços - Restaurante Saboroso!',
     background: 'images/img_bg_1.jpg',
     h1: 'É um prazer poder servir!'
-  })
+  });
 });
-
 
 module.exports = router;
