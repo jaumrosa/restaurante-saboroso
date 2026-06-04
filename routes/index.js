@@ -8,7 +8,8 @@ router.get('/', async function(req, res, next) {
     const results = await menus.getMenus();
     res.render('index', { 
       title: 'Restaurante Saboroso!',
-      menus: results 
+      menus: results,
+      isHome: true
     });
   } catch(err) {
     console.error(err);
