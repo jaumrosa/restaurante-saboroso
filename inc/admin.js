@@ -1,4 +1,17 @@
+const getConnection = require('./db');
 module.exports = {
+
+    async dashboard(){
+        const conn = await getConnection();
+        const [results] = await conn.query(`
+            SELECT
+                (SELECT COUNT(*) FROM tb_contacts) AS nrcontacts,
+                (SELECT COUNT(*) FROM tb_menus) AS nrmenus,
+                (SELECT COUNT(*) FROM tb_reservations) AS nrreservations,
+                (SELECT COUNT(*) FROM tb_users) AS nrusers;
+        `)
+        return results[0];        
+    },
 
     getParams(req, params){
         return Object.assign({}, {
