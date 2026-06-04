@@ -7,6 +7,7 @@ const logger = require('morgan');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
+const formidable = require('formidable');
 
 const indexRouter = require('./routes/index');
 const adminRouter = require('./routes/admin');
@@ -25,6 +26,42 @@ redisClient.on('error', (err) => {
 redisClient.on('connect', () => {
   console.log('✅ Redis conectado com sucesso!');
 });
+
+app.use(function(req, res, next){
+  if (req.method === 'POST'){
+    const form = new formidable.IncomingForm({
+      uploadDir: path.join(__dirname, "/public/images"),
+      keepExtensions: true,
+      multiples: false
+    });
+    
+    form.parse(req, function(err, fields, files){
+      if (err) {
+        console.error('Erro no formidable:', err);
+        return next(err);
+      }
+      
+      for (let key in fields) {
+        if (Array.isArray(fields[key])) {
+          fields[key] = fields[key][0];
+        }
+      }
+      
+      for (let key in files) {
+        if (Array.isArray(files[key])) {
+          files[key] = files[key][0];
+        }
+      }
+      
+      req.fields = fields;
+      req.files = files;
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
