@@ -1,5 +1,11 @@
 class HcodeGrid {
     constructor(configs){
+        configs.listeners = Object.assign({
+            afterUpdateClick: (e) => {
+                $('#modal-update').modal('show');
+            }
+        }, configs.listeners);
+
         this.options = Object.assign({}, {
             formCreate: '#modal-create form',
             formUpdate: '#modal-update form',
@@ -17,6 +23,12 @@ class HcodeGrid {
 
         this.formUpdateEl = document.querySelector(this.options.formUpdate);
         this.formUpdateEl.save();
+    }
+
+    fireEvent(name, args){
+        if (typeof this.options.listeners[name] === 'function') {
+            this.options.listeners[name].apply(this, args);
+        }
     }
 
     initButtons(){
@@ -60,8 +72,7 @@ class HcodeGrid {
                             if (input) input.value = data[name];
                     }
                 }
-
-                $('#modal-update').modal('show');
+                this.fireEvent('afterUpdateClick', [e]);
             });
         });
     }
