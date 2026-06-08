@@ -139,7 +139,40 @@ router.delete("/reservations/:id", function(req, res, next){
 });
 
 router.get("/users", function(req, res, next){
+    users.getUsers().then(data => {
+        res.render("admin/users", admin.getParams(req, {
+            data
+        }));
+    });
     res.render("admin/users", admin.getParams(req));
+});
+
+router.post("/users", function(req, res, next){
+    users.save(req.fields).then(results => {
+        res.json({
+            success: true,
+            data: results
+        });
+    }).catch(err =>{
+        res.status(400).json({
+            success: false,
+            error: err.message 
+        });
+    });
+});
+
+router.delete("/users/:id", function(req, res, next){
+    users.delete(req.params.id).then(results => {
+        res.json({
+            success: true,
+            data: results
+        });
+    }).catch(err =>{
+        res.status(400).json({
+            success: false,
+            error: err.message 
+        });
+    });
 });
 
 module.exports = router;
