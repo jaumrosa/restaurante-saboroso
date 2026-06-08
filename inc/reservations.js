@@ -57,5 +57,17 @@ module.exports = {
     const conn = await getConnection();
     const [results] = await conn.query(`SELECT * FROM tb_Reservations ORDER BY date DESC`);
     return results;
+  },
+
+  async delete(id){
+    try {
+        const conn = await getConnection();
+        const [results] = await conn.query(`
+          DELETE FROM tb_reservations WHERE id = ?
+        `, [id]);
+        return results;
+      } catch (err) {
+          throw new Error(`Erro ao deletar reserva: ${err.message}`);
+      }
   }
 };
