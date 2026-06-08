@@ -160,6 +160,20 @@ router.post("/users", function(req, res, next){
     });
 });
 
+router.post("/users/password-change", function(req, res, next){
+    users.ChangePassword(req).then(results => {
+        res.json({
+            success: true,
+            data: results
+        });
+    }).catch(err =>{
+        res.status(400).json({
+            success: false,
+            error: err.message 
+        });
+    });
+});
+
 router.delete("/users/:id", function(req, res, next){
     users.delete(req.params.id).then(results => {
         res.json({

@@ -15,14 +15,14 @@ module.exports = {
         `, [email]);
         
         if (results.length === 0) {
-            throw new Error("Usuário ou senha incorretos.");
+            throw new Error("Email Incorreto.");
         }
         
         const row = results[0];
         
         // Verificar senha
         if (row.password !== password) {
-            throw new Error("Usuário ou senha incorretos.");
+            throw new Error("Senha incorreta.");
         }
 
         return row;
@@ -75,5 +75,29 @@ module.exports = {
       } catch (err) {
           throw new Error(`Erro ao deletar o usuário: ${err.message}`);
       }
+  },
+
+  async ChangePassword(req){
+    if (!req.fields.password){
+        throw new Error('Preencha a senha.');
+    } else if (req.fields.password !== req.fields.passwordConfirm) {
+        throw new Error('Confirme a senha corretamente.');
+    } else {
+        try {
+            const conn = await getConnection();
+            const [results] = await conn.query(`
+                UPDATE tb_users
+                SET password = ?
+                WHERE id = ?
+            `, [
+                req.fields.password,
+                req.fields.id
+            ]);
+            return results;
+        } catch (err) {
+            throw new Error(`Erro ao alterar a senha: ${err.message}`);
+        }
+    }
+
   }
 }
