@@ -30,7 +30,7 @@ module.exports = {
 
     async getUsers() {
         const conn = await getConnection();
-        const [results] = await conn.query(`SELECT * FROM tb_users ORDER BY title`);
+        const [results] = await conn.query(`SELECT * FROM tb_users ORDER BY name`);
         return results;
   },
 
