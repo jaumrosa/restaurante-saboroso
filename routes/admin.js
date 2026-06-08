@@ -88,10 +88,16 @@ router.post("/menus", function(req, res, next){
 
 router.delete("/menus/:id", function(req, res, next){
     menus.delete(req.params.id).then(results => {
-        res.send(results);
-    }).catch(err => {
-        res.send(err);
-    });
+        res.json({
+            success: true,
+            data: results
+        });
+    }).catch(err =>{
+        res.status(400).json({
+            success: false,
+            error: err.message 
+        });
+    })
 });
 
 router.get("/reservations", function(req, res, next){
@@ -115,14 +121,20 @@ router.post("/reservations", function(req, res, next){
             success: false,
             error: err.message 
         });
-    })
+    });
 });
 
 router.delete("/reservations/:id", function(req, res, next){
     reservations.delete(req.params.id).then(results => {
-        res.send(results);
-    }).catch(err => {
-        res.send(err);
+        res.json({
+            success: true,
+            data: results
+        });
+    }).catch(err =>{
+        res.status(400).json({
+            success: false,
+            error: err.message 
+        });
     });
 });
 

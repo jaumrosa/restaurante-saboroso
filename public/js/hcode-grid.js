@@ -3,6 +3,9 @@ class HcodeGrid {
         configs.listeners = Object.assign({
             afterUpdateClick: (e) => {
                 $('#modal-update').modal('show');
+            },
+            afterDeleteClick: (e) => {
+                window.location.reload();  
             }
         }, configs.listeners);
 
@@ -31,11 +34,16 @@ class HcodeGrid {
         }
     }
 
+    getTrData(e){
+        const tr = e.target.closest('tr');
+        return JSON.parse(tr.dataset.row);
+    }
+
     initButtons(){
         [...document.querySelectorAll(this.options.btnDelete)].forEach(btn => {
             btn.addEventListener('click', e => {
-                let tr = e.target.closest('tr');
-                let data = JSON.parse(tr.dataset.row);
+                
+                const data = this.getTrData(e);
                 
                 if(confirm(eval('`' + this.options.deleteMsg + '`'))) {
                     fetch(eval('`' + this.options.deleteUrl + '`'), {
@@ -44,14 +52,14 @@ class HcodeGrid {
                         .then(response => response.json())
                         .then(json => {
                             if (json.success) {
-                                window.location.reload();
+                                this.fireEvent('afterDeleteClick');
                             } else {
-                                alert('❌ ' + (json.error || 'Erro ao excluir'));
+                                alert(json.error);
                             }
                         })
                         .catch(err => {
                             console.error(err);
-                            alert('❌ Erro ao excluir');
+                            alert('Erro ao excluir');
                         });
                 }
             });
@@ -59,8 +67,8 @@ class HcodeGrid {
 
         [...document.querySelectorAll(this.options.btnUpdate)].forEach(btn => {
             btn.addEventListener('click', e => {
-                let tr = e.target.closest('tr');
-                let data = JSON.parse(tr.dataset.row);
+
+                const data = this.getTrData(e);
                 
                 for (let name in data) {
                     let input = this.formUpdateEl.querySelector(`[name=${name}]`);
