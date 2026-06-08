@@ -80,7 +80,7 @@
               </div>
               <div class="form-group">
                 <label for="inputPriceCreate">Preço</label>
-                <input type="number" class="form-control" id="inputPriceCreate" name="price">
+                <input type="number" class="form-control" id="inputPriceCreate" name="price" step="0.01" min="0">
               </div>
               <div class="form-group">
                 <label for="inputPhotoCreate">Foto</label>
@@ -121,7 +121,7 @@
               </div>
               <div class="form-group">
                 <label for="inputPriceUpdate">Preço</label>
-                <input type="number" class="form-control" id="inputPriceUpdate" name="price">
+                <input type="number" class="form-control" id="inputPriceUpdate" name="price" step="0.01" min="0">
               </div>
               <div class="form-group">
                 <label for="inputPhotoUpdate">Foto</label>
@@ -143,52 +143,26 @@
 <%- include("inc/footer") -%>
 <script src="/js/hcode-filereader.js"></script>
 <script src="/js/hcode-formsave.js"></script>
+<script src="/js/hcode-grid.js"></script>
 <script>
 
 new HcodeFileReader("#modal-create [type=file]", "#modal-create img");
 new HcodeFileReader("#modal-update [type=file]", "#modal-update img");
 
-const formCreate = document.querySelector("#modal-create form");
-formCreate.save();
-
-const formUpdate = document.querySelector("#modal-update form");
-formUpdate.save();
-
-[...document.querySelectorAll('.btn-delete')].forEach(btn => {
-  btn.addEventListener('click', e => {
-    let tr = e.target.closest('tr');
-    let data = JSON.parse(tr.dataset.row);
-    
-    if(confirm(`Deseja realmente excluir o prato "${data.title}"?`))
-    fetch(`/admin/menus/${data.id}`, {
-      method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(json => {
-      window.location.reload();
-    });
-  });
-});
-
-[...document.querySelectorAll('.btn-update')].forEach(btn => {
-  btn.addEventListener('click', e => {
-    let tr = e.target.closest('tr');
-    let data = JSON.parse(tr.dataset.row);
-    
-    for (let name in data) {
-      switch (name) {
-        case 'photo':
-          formUpdate.querySelector("img").src = `/${data[name]}`;
-          break;
-        default:
-          let input = formUpdate.querySelector(`[name=${name}]`);
-          if (input) input.value = data[name];
-      }
+new HcodeGrid({
+    deleteUrl: '/admin/menus/${data.id}',
+    deleteMsg: 'Deseja realmente excluir o prato ${data.title}?',
+    onUpdateLoad: (form, name, data) => {
+      let input = form.querySelector(`[name=${name}]`);
+        switch (name) {
+          case 'photo':
+            form.querySelector("img").src = `/${data[name]}`;
+            break;
+          default:
+            if (input) input.value = data[name];
+        }
     }
-
-    $('#modal-update').modal('show');
   });
-});
 
 </script>
 
