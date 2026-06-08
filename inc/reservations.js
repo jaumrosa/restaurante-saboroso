@@ -51,5 +51,11 @@ module.exports = {
     const [results] = await conn.query(query, params);
     
     return results;
+  },
+
+  async getReservations() {
+    const conn = await getConnection();
+    const [results] = await conn.query(`SELECT * FROM tb_Reservations ORDER BY date DESC`);
+    return results;
   }
 };
