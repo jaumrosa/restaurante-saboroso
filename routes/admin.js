@@ -3,7 +3,10 @@ const users = require('../inc/users');
 const admin = require('../inc/admin');
 const menus = require('../inc/menus');
 const reservations = require('../inc/reservations');
+const moment = require('moment');
 const router = express.Router();
+
+moment.locale('pt-BR');
 
 router.use(function(req, res, next){
     if(['/login'].indexOf(req.url) === -1 && !req.session.user){
@@ -95,7 +98,8 @@ router.get("/reservations", function(req, res, next){
     reservations.getReservations().then(data => {
         res.render("admin/reservations", admin.getParams(req, {
             date: {},
-            data
+            data,
+            moment
         }));
     });
 });
