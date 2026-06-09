@@ -9,19 +9,22 @@ const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 const formidable = require('formidable');
 const http = require('http');
-const socket = require('socket.io');
-
-const indexRouter = require('./routes/index');
-const adminRouter = require('./routes/admin');
+const { Server } = require('socket.io')
 
 const app = express();
 
 const server = http.createServer(app);
-const io = socket(server);
+const io = new Server(server)
 
 io.on('connection', function(socket){
-  console.log('Novo usuário detectado!')
+  console.log('Novo usuário detectado!');
+  io.emit("reservations update", {
+    date: new Date()
+  });
 });
+
+const indexRouter = require('./routes/index')(io);
+const adminRouter = require('./routes/admin')(io);
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,

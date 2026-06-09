@@ -1,3 +1,4 @@
+const { dashboard } = require('./admin');
 const getConnection = require('./db');
 const Pagination = require('./Pagination');
 const moment = require('moment');
@@ -128,5 +129,17 @@ module.exports = {
         months,
         values
       };
+    },
+
+    async dashboard() {
+      const conn = await getConnection();
+      const [results] = await conn.query(`
+              SELECT
+                  (SELECT COUNT(*) FROM tb_contacts) AS nrcontacts,
+                  (SELECT COUNT(*) FROM tb_menus) AS nrmenus,
+                  (SELECT COUNT(*) FROM tb_reservations) AS nrreservations,
+                  (SELECT COUNT(*) FROM tb_users) AS nrusers;    
+          `)
+      return results[0];
     }
   }
