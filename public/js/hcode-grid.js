@@ -30,10 +30,14 @@ class HcodeGrid {
 
     initForms(){
         this.formCreateEl = document.querySelector(this.options.formCreate); 
-        this.formCreateEl.save();
-
+        if(this.formCreateEl){
+            this.formCreateEl.save();
+        }
+        
         this.formUpdateEl = document.querySelector(this.options.formUpdate);
-        this.formUpdateEl.save();
+        if(this.formUpdateEl){
+            this.formUpdateEl.save();
+        }
     }
 
     fireEvent(name, args){

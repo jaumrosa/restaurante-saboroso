@@ -3,6 +3,7 @@ const users = require('../inc/users');
 const admin = require('../inc/admin');
 const menus = require('../inc/menus');
 const reservations = require('../inc/reservations');
+const contacts = require('../inc/contacts');
 const moment = require('moment');
 const router = express.Router();
 
@@ -57,7 +58,25 @@ router.get("/login", function(req, res, next){
 });
 
 router.get("/contacts", function(req, res, next){
-    res.render("admin/contacts", admin.getParams(req));
+    contacts.getContacts().then(data => {
+        res.render("admin/contacts", admin.getParams(req, {
+            data
+        }));
+    });
+});
+
+router.delete("/contacts/:id", function(req, res, next){
+    contacts.delete(req.params.id).then(results => {
+        res.json({
+            success: true,
+            data: results
+        });
+    }).catch(err =>{
+        res.status(400).json({
+            success: false,
+            error: err.message 
+        });
+    })
 });
 
 router.get("/emails", function(req, res, next){

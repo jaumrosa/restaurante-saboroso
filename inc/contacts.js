@@ -25,5 +25,25 @@ module.exports = {
         ]);
 
         return results;
+    },
+
+    async getContacts() {
+        const conn = await getConnection();
+        const [results] = await conn.query(`SELECT * FROM tb_contacts ORDER BY register DESC`);
+        return results;
+    },
+
+    async delete(id){
+        try {
+            const conn = await getConnection();
+            const [results] = await conn.query(`
+            DELETE FROM tb_contacts WHERE id = ?
+            `, [id]);
+            return results;
+        } catch (err) {
+            throw new Error(`Erro ao deletar contato: ${err.message}`);
+        }
     }
+
+
 }
