@@ -51,6 +51,9 @@
           </div>
           <!-- /.box-header -->
           <div class="box-body no-padding">
+            <div style="padding: 10px;">
+              <canvas id="chart" style="height: 250px;"></canvas>
+            </div>
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -199,6 +202,7 @@
     
 <%- include("inc/footer") -%>
 <script src="/js/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="/js/hcode-formsave.js"></script> 
 <script src="/js/hcode-grid.js"></script> 
 <script>
@@ -215,6 +219,43 @@
           default:
             if (input) input.value = data[name];
         }
+    }
+  });
+
+  let chart = new Chart(document.querySelector("#chart").getContext("2d"), {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+      datasets: [{
+        data:[3, 5, 6, 2, 5, 1],
+        label:'Reservas',
+        backgroundColor:'rgb(54, 162, 235)',
+        borderColor:'rgb(54, 162, 235)',
+        fill:true,
+        pointBackgroundColor:'#FFF'
+      }]
+    },
+    options:{
+      tooltips:{
+        mode:'index',
+        intersect:false
+      },
+      scales: {
+        x: {
+          display: true,
+          title: {
+            display: true,
+            text: 'Mês'
+          }
+        },
+        y: {
+          display: true,
+          title: {
+            display: true,
+            text: 'Reservas'
+          }
+        }
+      }
     }
   });
  
