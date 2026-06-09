@@ -1,5 +1,6 @@
 const getConnection = require('./db');
 const Pagination = require('./Pagination');
+const moment = require('moment');
 
 module.exports = {
   render(req, res, error, success) {
@@ -93,5 +94,39 @@ module.exports = {
       } catch (err) {
           throw new Error(`Erro ao deletar reserva: ${err.message}`);
       }
+  },
+
+  async chart(req){
+    const conn = await getConnection();
+    const [results] = await conn.query(`
+      SELECT
+        YEAR(date) AS year,
+        MONTH(date) AS month,
+        COUNT(*) AS total,
+        ROUND(SUM(people) / COUNT(*), 2) AS avg_people 
+      FROM tb_reservations
+      WHERE
+        date BETWEEN ? AND ?
+      GROUP BY YEAR(date), MONTH(date)
+      ORDER BY YEAR(date) DESC, MONTH(date) DESC
+    `, [
+      req.query.start,
+      req.query.end
+    ]);
+
+    const months = [];
+    const values = [];
+
+    results.forEach(row => {
+      // Criar data do primeiro dia do mês para formatar
+      const dateStr = `${row.year}-${String(row.month).padStart(2, '0')}-01`;
+      months.push(moment(dateStr).format('MMM YYYY'));
+      values.push(row.total);
+    });
+
+    return {
+      months,
+      values
+    };
   }
-};
+}
