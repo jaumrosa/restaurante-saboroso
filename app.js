@@ -8,11 +8,20 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 const formidable = require('formidable');
+const http = require('http');
+const socket = require('socket.io');
 
 const indexRouter = require('./routes/index');
 const adminRouter = require('./routes/admin');
 
 const app = express();
+
+const server = http.createServer(app);
+const io = socket(server);
+
+io.on('connection', function(socket){
+  console.log('Novo usuário detectado!')
+});
 
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
@@ -110,4 +119,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+server.listen(3000, function(){
+  console.log("Servidor em execução!")
+});
