@@ -28,7 +28,7 @@ module.exports = function (io){
     contacts.render(req, res)
   });
 
-  router.post('/contacts', function(req, res, next){
+  router.post('/contacts', async function(req, res, next){
     if(!req.body.name){
       contacts.render(req, res, 'Digite o nome!');
     } else if (!req.body.email){
@@ -36,13 +36,14 @@ module.exports = function (io){
     } else if (!req.body.message){
       contacts.render(req, res, 'Digite a mensagem!');
     } else {
-      contacts.save(req.body).then(results => {
-        req.body = {};
-        io.emit('dashboard update');
-        contacts.render(req, res, null, "Mensagem enviada com sucesso!")
-      }).catch(err => {
-        contacts.render(req, res, err.message);
-      })
+        try {
+          await contacts.save(req.body);
+          req.body = {};
+          io.emit('dashboard update');
+          contacts.render(req, res, null, "Sucesso!");
+      } catch(err) {
+          contacts.render(req, res, err.message);
+      }
     }
   });
 
@@ -65,7 +66,7 @@ module.exports = function (io){
     reservations.render(req, res);
   });
 
-  router.post('/reservations', function(req, res, next){
+  router.post('/reservations', async function(req, res, next){
     if(!req.body.name){
       reservations.render(req, res, "Digite o nome!");
     } else if (!req.body.email){
@@ -77,13 +78,14 @@ module.exports = function (io){
     } else if (!req.body.time){
       reservations.render(req, res, "Selecione o horário!");
     } else {
-      reservations.save(req.body).then(results => {
-        req.body = {};
-        io.emit('dashboard update');
-        reservations.render(req, res, null, "Reserva realizada com sucesso!");
-      }).catch(err => {
+        try{
+          await reservations.save(req.body);
+          req.body = {};
+          io.emit('dashboard update');
+          reservations.render(req, res, null, "Reserva realizada com sucesso!");
+      } catch(err) {
         reservations.render(req, res, err.message);
-      })
+      }
     }
 
   });
@@ -96,18 +98,19 @@ module.exports = function (io){
     });
   });
 
-  router.post('/subscribe', function(req, res, next){
-    emails.save(req).then(results => {
-            res.json({
-                success: true,
-                data: results
-            });
-        }).catch(err =>{
-            res.status(400).json({
-                success: false,
-                error: err.message 
-            });
-        }); 
+  router.post('/subscribe', async function(req, res, next){
+    try{
+      const results = emails.save(req);
+      res.json({
+          success: true,
+          data: results
+      });
+    } catch(err) {
+        res.status(400).json({
+            success: false,
+            error: err.message 
+        });
+      }; 
   });
 
   return router;
