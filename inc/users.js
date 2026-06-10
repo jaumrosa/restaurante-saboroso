@@ -1,4 +1,5 @@
 const getConnection = require('./db');
+const bcrypt = require('bcrypt');
 module.exports = {
 
     render(req, res, error){
@@ -21,7 +22,9 @@ module.exports = {
         const row = results[0];
         
         // Verificar senha
-        if (row.password !== password) {
+
+        const isValid = await bcrypt.compare(password, row.password);
+        if (!isValid) {
             throw new Error("Senha incorreta.");
         }
 
@@ -55,7 +58,8 @@ module.exports = {
                 VALUES(?, ?, ?)
             `;
 
-            params.push(fields.password);
+            const hashedPassword = await bcrypt.hash(fields.password, 10);
+            params.push(hashedPassword);
      
         }
         
@@ -85,12 +89,13 @@ module.exports = {
     } else {
         try {
             const conn = await getConnection();
+            const hashedPassword = await bcrypt.hash(req.fields.password, 10);
             const [results] = await conn.query(`
                 UPDATE tb_users
                 SET password = ?
                 WHERE id = ?
             `, [
-                req.fields.password,
+                hashedPassword  ,
                 req.fields.id
             ]);
             return results;
