@@ -1,5 +1,6 @@
 
 const getConnection = require('./db');
+const queries = require('./queries');
 module.exports = {
 
     render(req, res, error, success){
@@ -28,9 +29,7 @@ module.exports = {
     },
 
     async getContacts() {
-        const conn = await getConnection();
-        const [results] = await conn.query(`SELECT * FROM tb_contacts ORDER BY register DESC`);
-        return results;
+        return await queries.getAllContacts();
     },
 
     async delete(id){

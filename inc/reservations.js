@@ -2,6 +2,7 @@ const { dashboard } = require('./admin');
 const getConnection = require('./db');
 const Pagination = require('./Pagination');
 const moment = require('moment');
+const queries = require('./queries');
 
 module.exports = {
   render(req, res, error, success) {
@@ -98,28 +99,15 @@ module.exports = {
     },
 
     async chart(req){
-      const conn = await getConnection();
-      const [results] = await conn.query(`
-        SELECT
-          YEAR(date) AS year,
-          MONTH(date) AS month,
-          COUNT(*) AS total,
-          ROUND(SUM(people) / COUNT(*), 2) AS avg_people 
-        FROM tb_reservations
-        WHERE
-          date BETWEEN ? AND ?
-        GROUP BY YEAR(date), MONTH(date)
-        ORDER BY YEAR(date) DESC, MONTH(date) DESC
-      `, [
+      const results = await queries.getReservationsChart(
         req.query.start,
         req.query.end
-      ]);
+      );
 
       const months = [];
       const values = [];
 
       results.forEach(row => {
-        // Criar data do primeiro dia do mês para formatar
         const dateStr = `${row.year}-${String(row.month).padStart(2, '0')}-01`;
         months.push(moment(dateStr).format('MMM YYYY'));
         values.push(row.total);
@@ -132,14 +120,6 @@ module.exports = {
     },
 
     async dashboard() {
-      const conn = await getConnection();
-      const [results] = await conn.query(`
-              SELECT
-                  (SELECT COUNT(*) FROM tb_contacts) AS nrcontacts,
-                  (SELECT COUNT(*) FROM tb_menus) AS nrmenus,
-                  (SELECT COUNT(*) FROM tb_reservations) AS nrreservations,
-                  (SELECT COUNT(*) FROM tb_users) AS nrusers;    
-          `)
-      return results[0];
+      return await queries.getDashboardStats();
     }
   }

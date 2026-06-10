@@ -1,5 +1,6 @@
 const getConnection = require('./db');
 const bcrypt = require('bcrypt');
+const queries = require('./queries');
 module.exports = {
 
     render(req, res, error){
@@ -10,18 +11,13 @@ module.exports = {
     },
 
     async login(email, password){
-        const conn = await getConnection();
-        const [results] = await conn.query(`
-        SELECT * FROM tb_users WHERE email = ?
-        `, [email]);
+        const results = await queries.getUserByEmail(email);
         
         if (results.length === 0) {
             throw new Error("Email Incorreto.");
         }
         
         const row = results[0];
-        
-        // Verificar senha
 
         const isValid = await bcrypt.compare(password, row.password);
         if (!isValid) {
@@ -32,10 +28,8 @@ module.exports = {
     },
 
     async getUsers() {
-        const conn = await getConnection();
-        const [results] = await conn.query(`SELECT * FROM tb_users ORDER BY name`);
-        return results;
-  },
+        return await queries.getAllUsers();
+    },
 
     async save(fields){
         let query, params = [

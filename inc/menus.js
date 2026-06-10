@@ -1,11 +1,10 @@
 const getConnection = require('./db');
 const path = require('path');
+const queries = require('./queries');
 
 module.exports = {
   async getMenus() {
-    const conn = await getConnection();
-    const [results] = await conn.query(`SELECT * FROM tb_menus ORDER BY title`);
-    return results;
+    return await queries.getAllMenus();
   },
 
   async save(fields, files){
