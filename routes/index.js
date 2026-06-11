@@ -4,9 +4,7 @@ const menus = require('./../inc/menus');
 const reservations = require('./../inc/reservations');
 const contacts = require('./../inc/contacts');
 const emails = require('./../inc/emails');
-
-
-
+const { contactSchema, reservationSchema, validateWithAllErrors } = require('./../inc/validators');
 
 module.exports = function (io){
 
@@ -29,21 +27,20 @@ module.exports = function (io){
   });
 
   router.post('/contacts', async function(req, res, next){
-    if(!req.body.name){
-      contacts.render(req, res, 'Digite o nome!');
-    } else if (!req.body.email){
-      contacts.render(req, res, 'Digite o E-mail!');
-    } else if (!req.body.message){
-      contacts.render(req, res, 'Digite a mensagem!');
-    } else {
-        try {
-          await contacts.save(req.body);
-          req.body = {};
-          io.emit('dashboard update');
-          contacts.render(req, res, null, "Sucesso!");
-      } catch(err) {
-          contacts.render(req, res, err.message);
-      }
+    const errorMessage = validateWithAllErrors(contactSchema, req.body);
+
+    if (errorMessage) {
+      contacts.render(req, res, errorMessage);
+      return;
+    }
+
+    try {
+      await contacts.save(req.body);
+      req.body = {};
+      io.emit('dashboard update');
+      contacts.render(req, res, null, "Mensagem enviada com sucesso!");
+    } catch(err) {
+      contacts.render(req, res, err.message);
     }
   });
 
@@ -67,27 +64,21 @@ module.exports = function (io){
   });
 
   router.post('/reservations', async function(req, res, next){
-    if(!req.body.name){
-      reservations.render(req, res, "Digite o nome!");
-    } else if (!req.body.email){
-      reservations.render(req, res, "Digite o E-mail!");
-    } else if (!req.body.people){
-      reservations.render(req, res, "Selecione o número de pessoas!");
-    } else if (!req.body.date){
-      reservations.render(req, res, "Selecione a data!");
-    } else if (!req.body.time){
-      reservations.render(req, res, "Selecione o horário!");
-    } else {
-        try{
-          await reservations.save(req.body);
-          req.body = {};
-          io.emit('dashboard update');
-          reservations.render(req, res, null, "Reserva realizada com sucesso!");
-      } catch(err) {
-        reservations.render(req, res, err.message);
-      }
+    const { error } = reservationSchema.validate(req.body);
+  
+    if (errorMessage) {
+      reservations.render(req, res, errorMessage);
+      return;
     }
 
+    try {
+      await reservations.save(req.body);
+      req.body = {};
+      io.emit('dashboard update');
+      reservations.render(req, res, null, "Reserva realizada com sucesso!");
+    } catch(err) {
+      reservations.render(req, res, err.message);
+    }
   });
 
   router.get('/services', function(req, res, next){
