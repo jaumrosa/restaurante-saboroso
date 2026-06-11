@@ -1,4 +1,5 @@
 const getConnection = require('./db');
+const queries = require('./queries');
 module.exports = {
 
     async dashboard(){
