@@ -43,9 +43,19 @@
                   <td><%= row.title %></td>
                   <td><%= row.description %></td>
                   <td><%= row.price %></td>
-                  <td><button type="button" class="btn btn-xs btn-info btn-update" ><i
-                        class="fa fa-pencil"></i> Editar</button>&nbsp;<button type="button" class="btn btn-xs btn-danger btn-delete"><i
-                        class="fa fa-trash"></i> Excluir</button></td>
+                  <td>
+                    <button type="button" class="btn btn-xs btn-info btn-update">
+                      <i class="fa fa-pencil"></i> Editar
+                    </button>
+                    &nbsp;
+                    <button type="button" class="btn btn-xs btn-warning btn-clone">
+                      <i class="fa fa-copy"></i> Clonar
+                    </button>
+                    &nbsp;
+                    <button type="button" class="btn btn-xs btn-danger btn-delete">
+                      <i class="fa fa-trash"></i> Excluir
+                    </button>
+                  </td>
                 </tr>
                 <% }); %>
               </tbody>
@@ -161,8 +171,42 @@ new HcodeGrid({
           default:
             if (input) input.value = data[name];
         }
+    },
+    listeners: {
+      buttonClick: (btn, data, e) => {
+        if (btn.classList.contains('btn-clone')) {
+          fetch('/admin/menus/' + data.id + '/clone')
+            .then(response => response.json())
+            .then(json => {
+              if (json.success) {
+                const form = document.querySelector('#modal-create form');
+
+                form.querySelector('[name=title]').value = json.data.title;
+                form.querySelector('[name=description]').value = json.data.description;
+                form.querySelector('[name=price]').value = json.data.price;
+                
+                if (json.data.photo) {
+                  form.querySelector('img').src = '/' + json.data.photo;
+                  form.querySelector('img').style.display = 'block';
+                  
+                  let input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = 'photo';
+                  input.value = json.data.photo;
+                  form.appendChild(input);
+                }
+          
+                $('#modal-create').modal('show');
+              }
+            })
+            .catch(err => {
+              console.error('Erro ao clonar:', err);
+              alert('Erro ao clonar produto!');
+            });
+        }
+      }
     }
-  });
+});
 
 </script>
 

@@ -35,7 +35,7 @@ module.exports = {
       `;
     } else {
 
-      if (!hasPhoto){
+      if (!hasPhoto && !fields.photo){
         throw new Error('Envie a foto do prato.');
       }
       query = `

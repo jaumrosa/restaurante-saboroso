@@ -9,6 +9,22 @@ module.exports = {
     return results;
   },
 
+  async getMenuById(id) {
+    const conn = await getConnection();
+    const [results] = await conn.query(`
+      SELECT * FROM tb_menus WHERE id = ?
+    `, [id]);
+    return results[0];
+  },
+
+  async getAllEmails() {
+    const conn = await getConnection();
+    const [results] = await conn.query(`
+      SELECT * FROM tb_emails ORDER BY register DESC
+    `);
+    return results;
+  },
+
   async getAllUsers() {
     const conn = await getConnection();
     const [results] = await conn.query(`

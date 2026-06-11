@@ -3,9 +3,7 @@ const getConnection = require('./db');
 module.exports = {
 
     async getEmails() {
-        const conn = await getConnection();
-        const [results] = await conn.query(`SELECT * FROM tb_emails ORDER BY register DESC`);
-        return results;
+        return await queries.getAllEmails();
     },
 
     async delete(id){

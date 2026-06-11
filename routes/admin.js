@@ -6,6 +6,7 @@ const reservations = require('../inc/reservations');
 const contacts = require('../inc/contacts');
 const emails = require('../inc/emails');
 const queries = require('../inc/queries');
+const getConnection = require('../inc/db');
 const moment = require('moment');
 const router = express.Router();
 
@@ -139,6 +140,35 @@ module.exports = function(io){
             }));
         } catch(err){
             console.error(err);
+        }
+    });
+
+    router.get("/menus/:id/clone", async function(req, res, next){
+        try {
+            const menu = await queries.getMenuById(req.params.id);
+            if (!menu) {
+                res.status(404).json({ 
+                    success: false, 
+                    error: 'Produto não encontrado!' 
+                });
+                return;
+            }
+
+            res.json({
+                success: true,
+                data: {
+                    title: menu.title + ' - Cópia',
+                    description: menu.description,
+                    price: menu.price,
+                    photo: menu.photo
+                }
+            });
+            
+        } catch(err) {
+            res.status(400).json({ 
+                success: false, 
+                error: err.message 
+            });
         }
     });
 
