@@ -59,6 +59,15 @@ module.exports = {
         (SELECT COUNT(*) FROM tb_users) AS nrusers
     `);
     return results[0];
-  }
+  },
+
+  async countUsers() {
+    const conn = await getConnection();
+    const [results] = await conn.query(`
+      SELECT COUNT(*) AS total FROM tb_users
+    `);
+    return results[0].total;
+  },
+
 
 };

@@ -5,6 +5,7 @@ const menus = require('../inc/menus');
 const reservations = require('../inc/reservations');
 const contacts = require('../inc/contacts');
 const emails = require('../inc/emails');
+const queries = require('../inc/queries');
 const moment = require('moment');
 const router = express.Router();
 
@@ -285,9 +286,26 @@ module.exports = function(io){
     });
 
     router.delete("/users/:id", async function(req, res, next){
-        try{
+        try {
+            if (req.session.user && req.session.user.id == req.params.id) {
+                res.status(400).json({ 
+                    success: false, 
+                    error: 'Você não pode excluir sua própria conta!' 
+                });
+                return;
+            }
+
+            const totalUsers = await queries.countUsers();
+            if (totalUsers <= 1) {
+                res.status(400).json({ 
+                    success: false, 
+                    error: 'Não é possível excluir o último administrador do sistema!' 
+                });
+                return;
+            }
+
             const results = await users.delete(req.params.id);
-             res.json({
+            res.json({
                 success: true,
                 data: results
             });
