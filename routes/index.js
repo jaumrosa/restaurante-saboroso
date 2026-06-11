@@ -65,6 +65,8 @@ module.exports = function (io){
 
   router.post('/reservations', async function(req, res, next){
     const { error } = reservationSchema.validate(req.body);
+     const errorMessage = validateWithAllErrors(reservationSchema, req.body);
+
   
     if (errorMessage) {
       reservations.render(req, res, errorMessage);
