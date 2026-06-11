@@ -30,43 +30,45 @@ module.exports = function(io){
         res.redirect("/admin/login");
     });
 
-    router.get("/", function(req, res, next){
-        admin.dashboard().then(data => {
+    router.get("/", async function(req, res, next){
+        try{
+            const data = await admin.dashboard();
             res.render("admin/index", admin.getParams(req, {
                 data
             }));
-        }).catch(err => {
+        }catch(err) {
             console.error(err);
-        });
-        
+        }
     });
 
-    router.get("/dashboard", function(req, res, next){
-        reservations.dashboard().then(results => {
+    router.get("/dashboard", async function(req, res, next){
+        try{
+            const results = await reservations.dashboard();
             res.json({
                 success: true,
                 data: results
             });
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        })
+        }
     });
 
-    router.post("/login", function(req, res, next){
+    router.post("/login", async function(req, res, next){      
         if(!req.body.email){
             users.render(req, res, "Preencha o E-mail!");
         } else if (!req.body.password){
             users.render(req, res, "Preencha a senha!");
         } else {
-            users.login(req.body.email, req.body.password).then(user => {
-                req.session.user = user;
-                res.redirect("/admin");
-            }).catch(err => {
+            try{ 
+                const user = await users.login(req.body.email, req.body.password);
+                    req.session.user = user;
+                    res.redirect("/admin");
+            } catch(err) {
                 users.render(req, res, err.message);
-            });
+            };
         }
     });
 
@@ -74,95 +76,108 @@ module.exports = function(io){
         users.render(req, res, null);
     });
 
-    router.get("/contacts", function(req, res, next){
-        contacts.getContacts().then(data => {
+    router.get("/contacts", async function(req, res, next){
+        try{
+            const data = await contacts.getContacts();
             res.render("admin/contacts", admin.getParams(req, {
                 data
             }));
-        });
+        } catch(err){
+            console.error(err);
+        }
     });
 
-    router.delete("/contacts/:id", function(req, res, next){
-        contacts.delete(req.params.id).then(results => {
+    router.delete("/contacts/:id", async function(req, res, next){
+        try{
+            const results = await contacts.delete(req.params.id);
             res.json({
                 success: true,
                 data: results
             })
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        })
+        }
     });
 
-    router.get("/emails", function(req, res, next){
-        emails.getEmails().then(data => {
+    router.get("/emails", async function(req, res, next){
+        try{
+            const data = await emails.getEmails()
             res.render("admin/emails", admin.getParams(req, {
                 data
             }));
-        });
+        } catch(err){
+            console.error(err);
+        }
     });
 
-    router.delete("/emails/:id", function(req, res, next){
-        emails.delete(req.params.id).then(results => {
+    router.delete("/emails/:id", async function(req, res, next){
+        try{
+            const results = await emails.delete(req.params.id);
             res.json({
                 success: true,
                 data: results
             });
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        })
+        }
     });
 
-    router.get("/menus", function(req, res, next){
-        menus.getMenus().then(data => {
+    router.get("/menus", async function(req, res, next){
+        try{
+           const data = await menus.getMenus();
             res.render("admin/menus", admin.getParams(req, {
                 data
             }));
-        })
+        } catch(err){
+            console.error(err);
+        }
     });
 
-    router.post("/menus", function(req, res, next){
-        menus.save(req.fields, req.files).then(results => {
+    router.post("/menus", async function(req, res, next){
+        try{
+            const results = await menus.save(req.fields, req.files);
             res.json({
                 success: true,
                 data: results
             });
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        })
+        }
     });
 
-    router.delete("/menus/:id", function(req, res, next){
-        menus.delete(req.params.id).then(results => {
+    router.delete("/menus/:id", async function(req, res, next){
+        try{
+            const results = await menus.delete(req.params.id);
             res.json({
                 success: true,
                 data: results
             });
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        })
+        }
     });
 
-    router.get("/reservations", function(req, res, next){
-
-        const start = (req.query.start) ? req.query.start: moment().subtract(10, "years").format("YYYY-MM-DD");
-        const end = (req.query.end) ? req.query.end: moment().format("YYYY-MM-DD");
-        reservations.getReservations(req).then(pag => {
+    router.get("/reservations", async function(req, res, next){
+        try{
+            const start = (req.query.start) ? req.query.start: moment().subtract(10, "years").format("YYYY-MM-DD");
+            const end = (req.query.end) ? req.query.end: moment().format("YYYY-MM-DD");
+            const pag = await reservations.getReservations(req);
             res.render("admin/reservations", admin.getParams(req, {
                 date: {
                     start,
@@ -172,107 +187,117 @@ module.exports = function(io){
                 moment,
                 links: pag.links
             }));
-        });
+        } catch(err){
+            console.error(err);
+        }
     });
 
-    router.get("/reservations/charts", function(req, res, next){
-
+    router.get("/reservations/charts", async function(req, res, next){
+        
         req.query.start = (req.query.start) ? req.query.start: moment().subtract(10, "years").format("YYYY-MM-DD");
         req.query.end = (req.query.end) ? req.query.end: moment().format("YYYY-MM-DD");
-
-        reservations.chart(req).then(chartData => {
+        try{
+            const chartData = await reservations.chart(req);
             res.json({
                 success: true,
                 data: chartData
             });
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        });
+        }
     });
 
-    router.post("/reservations", function(req, res, next){
-        reservations.save(req.fields).then(results => {
+    router.post("/reservations", async function(req, res, next){
+        try{
+            const results = await reservations.save(req.fields);
             res.json({
                 success: true,
                 data: results
             });
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        });
+        }
     });
 
-    router.delete("/reservations/:id", function(req, res, next){
-        reservations.delete(req.params.id).then(results => {
+    router.delete("/reservations/:id", async function(req, res, next){
+        try{
+            const results = await reservations.delete(req.params.id);
             res.json({
                 success: true,
                 data: results
             });
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        });
+        }
     });
 
-    router.get("/users", function(req, res, next){
-        users.getUsers().then(data => {
+    router.get("/users", async function(req, res, next){
+        try{
+            const data = await users.getUsers();
             res.render("admin/users", admin.getParams(req, {
                 data
             }));
-        });
+        } catch(err){
+            console.error(err);
+        }
     });
 
-    router.post("/users", function(req, res, next){
-        users.save(req.fields).then(results => {
+    router.post("/users", async function(req, res, next){
+        try{
+            const results = await users.save(req.fields);
             res.json({
                 success: true,
                 data: results
             });
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        });
+        }
     });
 
-    router.post("/users/password-change", function(req, res, next){
-        users.ChangePassword(req).then(results => {
+    router.post("/users/password-change", async function(req, res, next){
+        try{
+            const results = await users.ChangePassword(req);
             res.json({
                 success: true,
                 data: results
             });
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        });
+        }
     });
 
-    router.delete("/users/:id", function(req, res, next){
-        users.delete(req.params.id).then(results => {
-            res.json({
+    router.delete("/users/:id", async function(req, res, next){
+        try{
+            const results = await users.delete(req.params.id);
+             res.json({
                 success: true,
                 data: results
             });
             io.emit('dashboard update');
-        }).catch(err =>{
+        } catch(err) {
             res.status(400).json({
                 success: false,
                 error: err.message 
             });
-        });
+        }
     });
 
     return router;
